@@ -27,6 +27,12 @@ h1 { font-size: 17px; margin: 0 0 6px; letter-spacing: .02em; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
 .seg button { background: transparent; color: var(--ink); border: 0; padding: 7px 12px; font-size: 13px; font-weight: 700; }
 .seg button[aria-pressed="true"] { background: var(--gold); color: #201800; }
+.stake { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.stake button { min-width: 44px; padding: 7px 0; border-radius: 9px; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--ink); font-size: 14px; font-weight: 700; }
+.stake .amt { min-width: 74px; text-align: center; color: var(--ink); font-size: 20px; font-weight: 800; }
+.stake .amt small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.tg { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 4px 8px; margin-top: 10px; font-size: 13px; }
+.tg .h { color: var(--muted); font-size: 11px; } .tg b { font-size: 15px; }
 .tally { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .tally b { color: var(--ink); font-size: 16px; }
 .table { display: grid; grid-template-columns: 1fr; gap: 6px; }
@@ -96,6 +102,7 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
   <section class="panel" aria-label="操作">
     <div id="result" hidden></div>
     <p class="msg" id="msg"></p>
+    <div class="stake" id="stakeRow"><span>ベット</span><button type="button" id="stM10">−10</button><button type="button" id="stM1">−1</button><span class="amt"><span id="stAmt">1</span><small> pt</small></span><button type="button" id="stP1">+1</button><button type="button" id="stP10">+10</button></div>
     <div class="row" id="betRow">
       <button type="button" class="big b" id="betB">バンカーに賭ける</button>
       <button type="button" class="big p" id="betP">プレイヤーに賭ける</button>
@@ -122,6 +129,7 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
 
   <section class="panel" aria-label="成績">
     <div class="tally" id="tally"></div>
+    <div class="tg" id="tgbox"></div>
   </section>
 
   <section class="panel" aria-label="設定">
@@ -142,12 +150,14 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
     <details>
       <summary>バカラのルール・あそび方(はじめての方へ)</summary>
       <p><b>罫線の見方:</b> 青=バンカー、赤=プレイヤー、緑のT=タイ(ひとつ下に並びます)。丸の中の数字はその手の勝った側の合計(8・9はナチュラル)、塗りつぶしは賭けが的中した手です。</p>
+      <p><b>ベットと損益:</b> 賭けるポイントは+/−で変えられます(はじめは1ポイント)。プレイヤー勝ちもバンカー勝ちも賭け×1(等倍)、タイは戻ります。</p>
+      <p><b>虎・龍:</b> 小虎=バンカーが2枚の6で勝ち、大虎=3枚の6で勝ち。小龍=プレイヤーが2枚の7で勝ち、大龍=3枚の7で勝ち。「賭けて出た」は、その側に賭けていた手の回数です。</p>
       <p><b>スクイーズ:</b> カバーを指で、上・下・左・右のどこからでも動かせます。途中で止められるので、マークの数だけを見ましょう。相手の伏せた札は、タップで開きます。</p>
       <p>2枚ずつ配られ、合計の<b>1の位</b>が点数です(A=1、2〜9はそのまま、10・J・Q・Kは0)。9に近いほうが勝ちです。</p>
       <p><b>ナチュラル:</b> 最初の2枚が8か9なら、そこで勝負が決まります。</p>
       <p><b>プレイヤー:</b> 0〜5なら3枚目を引き、6〜7なら引きません。</p>
       <p><b>バンカー:</b> プレイヤーの3枚目で決まります。0〜2は必ず引き、3〜6は条件つきで引きます。7は引きません。プレイヤーが引かないときは、0〜5で引きます。</p>
-      <p><b>賭け:</b> 勝てば賭け金の1倍。バンカーで勝つと5%の手数料で0.95倍。同点(タイ)は、バンカー・プレイヤーの賭けが戻ります。</p>
+      <p><b>賭け:</b> 勝てば賭け金の1倍(バンカーも等倍で、手数料はありません)。同点(タイ)は、バンカー・プレイヤーの賭けが戻ります。</p>
     </details>
   </section>
 </div>
@@ -376,9 +386,13 @@ function streakInfo(hands) {
 (function () {
   const $ = (id) => document.getElementById(id);
   const SK = 'baccarat-practice-game-v1';
-  let S = { guide: 1, sq: 's', dir: 'd', hist: [], open: 1, order: 'first', w: 0, l: 0, t: 0, pts: 0, streak: 0 };
+  let S = { bet: 1, tg: {}, guide: 1, sq: 's', dir: 'd', hist: [], open: 0, order: 'first', w: 0, l: 0, t: 0, pts: 0, streak: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem(SK) || '{}')); } catch (e) { /* ignore */ }
   if (S.sq === 'v' || S.sq === 'h') S.sq = 's';
+  if (!(S.v >= 2)) { S.v = 2; S.open = 0; }
+  if (!(S.bet >= 1)) S.bet = 1;
+  S.bet = Math.min(1000, Math.floor(S.bet));
+  ['ST', 'BT', 'SD', 'BD'].forEach((k) => { if (!Array.isArray(S.tg[k])) S.tg[k] = [0, 0]; });
   if (!Array.isArray(S.hist)) S.hist = [];
   if (!Array.isArray(S.nat)) S.nat = [];
   if (!Array.isArray(S.tot)) S.tot = (S.nat || []).map((n) => (n >= 8 ? n : -1));
@@ -524,9 +538,9 @@ function streakInfo(hands) {
   }
   function startRound(me) {
     if (pos > shoe.length - 24) newShoe();
-    R = { me, cards: {}, seq: [], over: false, oppOpened: false, oppFlipped: false, oppTap: true };
+    R = { me, stake: S.bet, cards: {}, seq: [], over: false, oppOpened: false, oppFlipped: false, oppTap: true };
     ['p1', 'b1', 'p2', 'b2'].forEach(deal);
-    $('result').hidden = true; $('betRow').hidden = true;
+    $('result').hidden = true; $('betRow').hidden = true; $('stakeRow').hidden = true;
     const opp = other(me), n = S.open;
     if (S.order === 'first') { SLOTS[opp].slice(0, n).forEach((s) => { if (['p1', 'p2', 'b1', 'b2'].includes(s)) R.cards[s].rev = true; }); R.oppOpened = true; }
     draw(); advance();
@@ -575,15 +589,21 @@ function streakInfo(hands) {
     S.tot.push(res === 2 ? -1 : res === 1 ? ptOf(st) : btOf(st));
     S.hist.push(res); S.nat.push(nat >= 8 ? nat : 0); S.win.push(res !== 2 && res === (R.me === 'B' ? 0 : 1) ? 1 : 0); if (S.hist.length > 150) { S.hist.shift(); S.nat.shift(); S.win.shift(); S.tot.shift(); }
     const meIdx = R.me === 'B' ? 0 : 1;
+    const stake = R.stake || 1, fmt = (x) => (Math.round(x * 100) / 100).toFixed(2);
     let cls, txt, d;
     if (res === 2) { S.t++; S.streak = 0; cls = 't'; txt = 'タイ(引き分け)　賭けは戻ります'; d = 0; }
-    else if (res === meIdx) { d = R.me === 'B' ? 0.95 : 1; S.w++; S.streak++; S.pts += d; cls = 'w'; txt = '勝ち!　+' + d.toFixed(2); }
-    else { S.l++; S.streak = 0; S.pts -= 1; cls = 'l'; txt = '負け　−1.00'; }
+    else if (res === meIdx) { d = stake; S.w++; S.streak++; S.pts += d; cls = 'w'; txt = '勝ち!　+' + fmt(d) + ' pt'; }
+    else { S.l++; S.streak = 0; S.pts -= stake; cls = 'l'; txt = '負け　−' + fmt(stake) + ' pt'; }
+    // 小虎・大虎(バンカー6勝ち)、小龍・大龍(プレイヤー7勝ち)。小=2枚、大=3枚
+    let tdKey = null;
+    if (res === 0 && btOf(st) === 6) tdKey = R.cards.b3 ? 'BT' : 'ST';
+    if (res === 1 && ptOf(st) === 7) tdKey = R.cards.p3 ? 'BD' : 'SD';
+    if (tdKey) { S.tg[tdKey][0]++; if (res === meIdx) S.tg[tdKey][1]++; txt += '　' + ({ ST: '小虎', BT: '大虎', SD: '小龍', BD: '大龍' })[tdKey] + '!'; }
     save();
     const p = ptOf(st), b = btOf(st);
     const el = $('result'); el.hidden = false; el.className = 'res ' + cls; el.textContent = txt;
     setMsg('プレイヤー <b>' + p + '</b> ・ バンカー <b>' + b + '</b>。' + (res === 0 ? 'バンカーの勝ちです。' : res === 1 ? 'プレイヤーの勝ちです。' : '同点です。'));
-    act('次のゲーム', () => { R = null; draw(); $('result').hidden = true; $('betRow').hidden = false; act(null, null, false); setMsg('賭ける側を選んでください。'); guide(); tallyRender(); }, false);
+    act('次のゲーム', () => { R = null; draw(); $('result').hidden = true; $('betRow').hidden = false; $('stakeRow').hidden = false; act(null, null, false); setMsg('賭ける側を選んでください。'); guide(); tallyRender(); }, false);
     tallyRender(); guide();
   }
   function roadRender() {
@@ -613,8 +633,10 @@ function streakInfo(hands) {
   function tallyRender() {
     roadRender();
     const n = S.w + S.l;
-    $('tally').innerHTML = '<span>勝 <b>' + S.w + '</b></span><span>負 <b>' + S.l + '</b></span><span>タイ <b>' + S.t + '</b></span><span>損益 <b>' + (S.pts >= 0 ? '+' : '−') + Math.abs(S.pts).toFixed(2) + '</b></span><span>連勝 <b>' + S.streak + '</b></span>' + (n ? '<span>勝率 <b>' + Math.round(S.w / n * 100) + '%</b></span>' : '') + '<button type="button" class="ghost" id="reset" style="margin-left:auto">リセット</button>';
-    $('reset').onclick = function () { if (this.dataset.a) { S.w = S.l = S.t = S.pts = S.streak = 0; S.hist = []; S.nat = []; S.win = []; S.tot = []; save(); newShoe(); tallyRender(); } else { this.dataset.a = 1; this.textContent = 'もう一度で消去'; setTimeout(() => { this.dataset.a = ''; this.textContent = 'リセット'; }, 2500); } };
+    $('tally').innerHTML = '<span>勝 <b>' + S.w + '</b></span><span>負 <b>' + S.l + '</b></span><span>タイ <b>' + S.t + '</b></span><span>損益 <b>' + (S.pts >= 0 ? '+' : '−') + Math.abs(S.pts).toFixed(2) + ' pt</b></span><span>連勝 <b>' + S.streak + '</b></span>' + (n ? '<span>勝率 <b>' + Math.round(S.w / n * 100) + '%</b></span>' : '') + '<button type="button" class="ghost" id="reset" style="margin-left:auto">リセット</button>';
+    const NM = [['ST', '小虎'], ['BT', '大虎'], ['SD', '小龍'], ['BD', '大龍']];
+    $('tgbox').innerHTML = '<span class="h">虎・龍</span><span class="h">出た回数</span><span class="h">賭けて出た</span>' + NM.map((k) => '<span>' + k[1] + '</span><span><b>' + S.tg[k[0]][0] + '</b></span><span><b>' + S.tg[k[0]][1] + '</b></span>').join('');
+    $('reset').onclick = function () { if (this.dataset.a) { S.w = S.l = S.t = S.pts = S.streak = 0; S.tg = { ST: [0, 0], BT: [0, 0], SD: [0, 0], BD: [0, 0] }; S.hist = []; S.nat = []; S.win = []; S.tot = []; save(); newShoe(); tallyRender(); } else { this.dataset.a = 1; this.textContent = 'もう一度で消去'; setTimeout(() => { this.dataset.a = ''; this.textContent = 'リセット'; }, 2500); } };
   }
 
   // ---- guide: win chance estimated from what you can see ----
@@ -648,7 +670,7 @@ function streakInfo(hands) {
     g.hidden = !S.guide;
     if (!S.guide) return;
     $('chips').innerHTML = ''; $('chipNote').textContent = '';
-    if (!R) { $('guideText').innerHTML = 'バンカーは勝つと0.95倍ですが、勝つ確率がわずかに高めです。プレイヤーは1倍です。どちらも、長く遊ぶとわずかに不利になるゲームです。'; return; }
+    if (!R) { $('guideText').innerHTML = 'バンカーもプレイヤーも、勝てば賭けの1倍です。バンカーのほうが、勝つ確率がわずかに高めです。'; return; }
     if (R.over) { $('guideText').innerHTML = '結果が出ました。ナチュラル(8・9)や、3枚目のルールで、勝負がどう動いたかを見返してみましょう。'; return; }
     const me = R.me, known = knownMap(), p0 = pool();
     const target = minePending()[0];
@@ -687,6 +709,9 @@ function streakInfo(hands) {
   [['sGuide', 'guide', Number], ['sSq', 'sq', String], ['sOpen', 'open', Number], ['sOrder', 'order', String]].forEach(([id, key, cast]) => {
     document.querySelectorAll('#' + id + ' button').forEach((b) => b.addEventListener('click', () => { S[key] = cast(b.dataset.v); save(); segSync(); if (key === 'sq' && R && !R.over) draw(); guide(); }));
   });
+  const stakeSet = (v) => { S.bet = Math.max(1, Math.min(1000, v)); $('stAmt').textContent = S.bet; save(); };
+  [['stM10', -10], ['stM1', -1], ['stP1', 1], ['stP10', 10]].forEach((x) => $(x[0]).addEventListener('click', () => stakeSet(S.bet + x[1])));
+  $('stAmt').textContent = S.bet;
   $('betB').addEventListener('click', () => startRound('B'));
   $('betP').addEventListener('click', () => startRound('P'));
   segSync(); tallyRender(); draw(); setMsg('賭ける側を選んでください。'); guide();
