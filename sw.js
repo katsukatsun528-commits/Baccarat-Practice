@@ -1,6 +1,6 @@
 // Offline cache for the Baccarat apps. After the first online visit each app opens without a connection.
-// To publish an update, change CACHE (for example bk-prac-v2) and upload this file with the changed pages.
-const CACHE = 'bk-prac-v2';
+// The CACHE name changes automatically with the page content.
+const CACHE = 'bk-prac-v2-63663742';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -9,19 +9,16 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
-// serve from cache first, refresh the cache in the background (an update shows on the next open)
+// network first (always the newest page when online), the cache is only the offline fallback
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
   e.respondWith(
-    caches.match(req, { ignoreSearch: true }).then((hit) => {
-      const net = fetch(req).then((res) => {
-        if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
-        return res;
-      }).catch(() => hit || caches.match('./index.html'));
-      return hit || net;
-    })
+    fetch(req, { cache: 'no-cache' }).then((res) => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+      return res;
+    }).catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || caches.match('./index.html')))
   );
 });
