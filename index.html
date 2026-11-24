@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta name="app-version" content="2.0.0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3a2a0e">
@@ -18,9 +19,9 @@
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: radial-gradient(120% 80% at 50% 0%, #17594a, #0a2a23 70%); color: var(--ink); font-family: -apple-system, 'Hiragino Sans', 'Noto Sans JP', 'Malgun Gothic', sans-serif; min-height: 100dvh; }
 .wrap { max-width: 560px; margin: 0 auto; padding: calc(8px + env(safe-area-inset-top)) 10px 40px; }
-h1 { font-size: 17px; margin: 0 0 6px; letter-spacing: .02em; }
+h1 { display: none; }
 .sub { display: none; }
-.panel { background: rgba(19,74,61,.85); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; }
+.panel { background: rgba(19,74,61,.85); border: 1px solid var(--line); border-radius: 12px; padding: 7px 10px; margin-bottom: 6px; }
 .panel h2 { font-size: 14px; color: var(--gold); margin: 0 0 8px; }
 .set { display: grid; grid-template-columns: 88px 1fr; gap: 8px 8px; align-items: center; }
 .set label { font-size: 12px; color: var(--muted); }
@@ -42,22 +43,40 @@ h1 { font-size: 17px; margin: 0 0 6px; letter-spacing: .02em; }
 .side h3 .me { font-size: 10px; background: var(--gold); color: #201800; border-radius: 6px; padding: 1px 6px; margin-left: 0; display: inline-block; }
 .side h3 .tot { font-size: 30px; font-weight: 800; line-height: 1; }
 .cards { display: flex; gap: 6px; flex-wrap: nowrap; min-height: 115px; }
-.card { position: relative; width: 80px; height: 115px; border-radius: 8px; background: #fbf8ee; color: #1b1b1b; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.45); user-select: none; -webkit-user-select: none; flex: none; }
+.cards.tri { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; gap: 6px; justify-content: start; }
+.cards.tri > :nth-child(3) { grid-column: 1; grid-row: 1 / span 2; --cw: var(--cw3); }
+.cards.tri > :nth-child(1) { grid-column: 2; grid-row: 1; --cw: var(--cw2); }
+.cards.tri > :nth-child(2) { grid-column: 2; grid-row: 2; --cw: var(--cw2); }
+.card { position: relative; width: var(--cw, 80px); height: calc(var(--cw, 80px) * 1.4375); font-size: calc(var(--cw, 80px) * 0.2); border-radius: 8px; background: #fbf8ee; color: #1b1b1b; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.45); user-select: none; -webkit-user-select: none; flex: none; }
 .card.red { color: #c0281e; }
-.card .cn { position: absolute; font-weight: 800; line-height: 1; font-size: 14px; text-align: center; }
-.card .pip { position: absolute; transform: translate(-50%,-50%); font-size: 17px; line-height: 1; }
+.card .cn { position: absolute; font-weight: 800; line-height: 1; font-size: .875em; text-align: center; }
+.card .pip { position: absolute; transform: translate(-50%,-50%); font-size: 1.06em; line-height: 1; }
 .card .pip.dn { transform: translate(-50%,-50%) rotate(180deg); }
-.card .pip.bigp { font-size: 44px; }
-.card .face { position: absolute; inset: 17px 12px; border: 2px solid currentColor; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; line-height: 1; opacity: .9; }
-.card .face small { font-size: 22px; }
+.card .pip.bigp { font-size: 2.75em; }
+.card .face { position: absolute; inset: 7.5% 18%; border: 1.5px solid currentColor; border-radius: 4px; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(0,0,0,.02) 0 50%, rgba(0,0,0,.07) 50% 100%); }
+.card .face .fh { flex: 1; display: flex; align-items: center; justify-content: center; gap: .1em; font-weight: 800; font-size: 1.7em; line-height: 1; }
+.card .face .fh:first-child { border-bottom: 1px solid currentColor; }
+.card .face .fh.dn { transform: rotate(180deg); }
+.card .face .fh small { font-size: .95em; }
 .card:not(.gone) .cn, .card:not(.gone) .fl { visibility: hidden; }
 .card .cover.tap { cursor: pointer; color: #fff; font-size: 13px; font-weight: 700; }
-.roadbox { overflow-x: auto; padding-bottom: 4px; }
-.road { display: grid; grid-template-rows: repeat(6, 26px); grid-auto-flow: column; grid-auto-columns: 26px; gap: 1px; width: max-content; background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% 27px; }
-.rc { width: 26px; height: 26px; position: relative; }
-.rc i { position: absolute; inset: 2px; border-radius: 50%; border: 3px solid; box-sizing: border-box; }
+.zoomov { position: fixed; inset: 0; z-index: 50; background: rgba(4,20,16,.94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; touch-action: none; }
+.zoomov p { color: var(--muted); font-size: 13px; margin: 0; text-align: center; padding: 0 20px; }
+.zoomov[hidden] { display: none; }
+.ruleBtn { background: rgba(0,0,0,.25); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; font-size: 11px; padding: 2px 8px; margin-left: 4px; vertical-align: 1px; }
+.cond > div { display: flex; gap: 10px; align-items: baseline; padding: 6px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.cond b:first-child { flex: none; width: 74px; color: var(--gold); }
+.cond span { flex: 1; text-align: left; }
+.rt { border-collapse: collapse; width: 100%; font-size: 13px; text-align: center; }
+.rt th, .rt td { border: 1px solid var(--line); padding: 5px 2px; }
+.rt th { font-size: 11px; color: var(--muted); font-weight: 600; } .rt th.np { color: var(--gold); }
+.rt td.dy { background: rgba(80,200,140,.22); color: #8fe8b8; font-weight: 800; } .rt td.ns { color: var(--muted); }
+.roadbox { overflow-x: auto; padding-bottom: 0; }
+.road { display: grid; grid-template-rows: repeat(6, 20px); grid-auto-flow: column; grid-auto-columns: 20px; gap: 1px; width: max-content; background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% 21px; }
+.rc { width: 20px; height: 20px; position: relative; }
+.rc i { position: absolute; inset: 1.5px; border-radius: 50%; border: 3px solid; box-sizing: border-box; }
 .rc i.b { border-color: #5aa0f0; color: #5aa0f0; } .rc i.p { border-color: #ef6a60; color: #ef6a60; }
-.rc i.b, .rc i.p { font-style: normal; font-weight: 900; font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.rc i.b, .rc i.p { font-style: normal; font-weight: 900; font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center; }
 .rc i.b.w { background: #2f6fc4; border-color: #2f6fc4; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.5); } .rc i.p.w { background: #c93f35; border-color: #c93f35; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.5); }
 .rc i.t { background: #2fae6b; border-color: #2fae6b; color: #fff; font-style: normal; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
 .rc u { position: absolute; left: 1px; right: 1px; top: 50%; border-top: 2px solid #52c795; transform: rotate(-45deg); text-decoration: none; }
@@ -72,18 +91,24 @@ h1 { font-size: 17px; margin: 0 0 6px; letter-spacing: .02em; }
 .card .cover { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #23406f 0 6px, #2d5190 6px 12px); border: 3px solid #fbf8ee; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,.5); touch-action: none; transition: transform .22s ease; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.55); font-size: 11px; }
 .card .cover.opp { cursor: default; }
 .card.gone .cover { display: none; }
-.empty { width: 80px; height: 115px; border-radius: 8px; border: 1px dashed var(--line); }
+.empty { width: var(--cw, 80px); height: calc(var(--cw, 80px) * 1.4375); font-size: calc(var(--cw, 80px) * 0.2); border-radius: 8px; border: 1px dashed var(--line); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .big { flex: 1; padding: 10px; font-size: 16px; font-weight: 800; border-radius: 12px; border: 2px solid var(--line); background: rgba(0,0,0,.2); color: var(--ink); }
 .big.b { border-color: var(--banker); color: var(--banker); } .big.p { border-color: var(--player); color: var(--player); }
 .big.go { background: var(--gold); color: #201800; border-color: var(--gold); }
 .ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 8px 12px; font-size: 13px; }
-.msg { font-size: 14px; line-height: 1.5; min-height: 21px; margin: 0 0 6px; }
+.msg { font-size: 14px; line-height: 1.5; min-height: 21px; margin: 0; }
+[aria-label="操作"] { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+[aria-label="操作"] > #result, [aria-label="操作"] > #stakeRow, [aria-label="操作"] > #betRow { flex: 1 1 100%; }
+[aria-label="操作"] > #msg { flex: 1 1 0; min-width: 120px; }
+[aria-label="操作"] > #actRow { flex: none; margin: 0; }
+#actRow .big { padding: 8px 14px; font-size: 14px; } #actRow .ghost { padding: 7px 10px; }
 .res { font-size: 17px; font-weight: 800; text-align: center; padding: 5px; border-radius: 10px; margin-bottom: 6px; }
 .res.w { background: rgba(82,199,149,.2); color: var(--tie); } .res.l { background: rgba(239,106,96,.2); color: var(--player); } .res.t { background: rgba(230,197,110,.2); color: var(--gold); }
-.chips { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
-.chip { border-radius: 8px; padding: 6px 2px; text-align: center; font-size: 12px; background: rgba(0,0,0,.25); }
-.chip b { display: block; font-size: 15px; }
+.chips { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-top: 6px; }
+#guide h2, #chipNote { display: none; } #guide:not(.open) .more { display: none; } .moreHint { color: var(--muted); font-size: 11px; } #guide.open .moreHint { display: none; } #guide { padding: 6px 10px; } #guide .msg { font-size: 13px; line-height: 1.45; min-height: 0; margin: 0; }
+.chip { border-radius: 6px; padding: 3px 0; text-align: center; font-size: 10px; background: rgba(0,0,0,.25); }
+.chip b { display: block; font-size: 11px; }
 .chip.win { background: rgba(82,199,149,.28); } .chip.lose { background: rgba(239,106,96,.28); } .chip.mid { background: rgba(230,197,110,.22); }
 .note { color: var(--muted); font-size: 12px; line-height: 1.6; }
 details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); font-weight: 700; padding: 4px 0; }
@@ -97,6 +122,13 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
 
   <section class="panel" aria-label="罫線">
     <div class="roadbox" id="roadbox"><div class="road" id="road"></div></div>
+  </section>
+
+  <section class="panel" aria-label="ガイド" id="guide" hidden>
+    <h2>ガイド</h2>
+    <div id="guideText" class="msg"></div>
+    <div class="chips" id="chips"></div>
+    <p class="note" id="chipNote"></p>
   </section>
 
   <section class="panel" aria-label="操作">
@@ -120,12 +152,6 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
     </div>
   </section>
 
-  <section class="panel" aria-label="ガイド" id="guide" hidden>
-    <h2>ガイド</h2>
-    <div id="guideText" class="msg"></div>
-    <div class="chips" id="chips"></div>
-    <p class="note" id="chipNote"></p>
-  </section>
 
   <section class="panel" aria-label="成績">
     <div class="tally" id="tally"></div>
@@ -139,6 +165,10 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
       <div class="seg" id="sGuide"><button type="button" data-v="1">あり</button><button type="button" data-v="0">なし</button></div>
       <label>めくり方</label>
       <div class="seg" id="sSq"><button type="button" data-v="s">スクイーズ</button><button type="button" data-v="t">タップ</button></div>
+      <label>めくり途中で指をはなしたとき</label>
+      <div class="seg" id="sSn"><button type="button" data-v="b">元に戻る</button><button type="button" data-v="s">その場で止まる</button></div>
+      <label id="sizeLbl">自分の札の大きさ</label>
+      <div class="seg" id="sSz"><button type="button" data-v="s">小</button><button type="button" data-v="m">中</button><button type="button" data-v="l">大</button></div>
       <label>相手の札</label>
       <div class="seg" id="sOpen"><button type="button" data-v="0">伏せる</button><button type="button" data-v="1">1枚開く</button><button type="button" data-v="2">2枚開く</button></div>
       <label>開く順</label>
@@ -152,6 +182,7 @@ details { font-size: 13px; line-height: 1.7; } summary { color: var(--gold); fon
       <p><b>罫線の見方:</b> 青=バンカー、赤=プレイヤー、緑のT=タイ(ひとつ下に並びます)。丸の中の数字はその手の勝った側の合計(8・9はナチュラル)、塗りつぶしは賭けが的中した手です。</p>
       <p><b>ベットと損益:</b> 賭けるポイントは+/−で変えられます(はじめは1ポイント)。プレイヤー勝ちもバンカー勝ちも賭け×1(等倍)、タイは戻ります。</p>
       <p><b>虎・龍:</b> 小虎=バンカーが2枚の6で勝ち、大虎=3枚の6で勝ち。小龍=プレイヤーが2枚の7で勝ち、大龍=3枚の7で勝ち。「賭けて出た」は、その側に賭けていた手の回数です。</p>
+      <p><b>ガイドの数字:</b> 札の数字は、いま見ようとしている札がその数字だったときの「あなたの勝ち」の確率です。緑は有利、赤は不利です。</p>
       <p><b>スクイーズ:</b> カバーを指で、上・下・左・右のどこからでも動かせます。途中で止められるので、マークの数だけを見ましょう。相手の伏せた札は、タップで開きます。</p>
       <p>2枚ずつ配られ、合計の<b>1の位</b>が点数です(A=1、2〜9はそのまま、10・J・Q・Kは0)。9に近いほうが勝ちです。</p>
       <p><b>ナチュラル:</b> 最初の2枚が8か9なら、そこで勝負が決まります。</p>
@@ -382,11 +413,43 @@ function streakInfo(hands) {
 }
 
 </script>
+<div class="zoomov" id="ruleov" hidden style="background: #07241d; touch-action: auto; overflow-y: auto; justify-content: flex-start; padding: 56px 14px 24px;">
+  <div style="width: 100%; max-width: 480px;">
+    <h2 style="margin: 0 0 8px; font-size: 16px;">3枚目のルール</h2>
+    <p style="font-size: 13px; margin: 0 0 8px; text-align: left; padding: 0;"><b>プレイヤー</b>: 最初の2枚の合計が 0〜5 なら3枚目を引き、6・7 なら引きません。8・9 はナチュラルで、どちらも引かずに勝負です。</p>
+    <p style="font-size: 13px; margin: 0 0 8px; text-align: left; padding: 0;"><b>バンカー</b>: プレイヤーが引かなかったときは、0〜5 で引き、6・7 で引きません。プレイヤーが3枚目を引いたときは、下の表のとおりです(列は、プレイヤーの3枚目の数。10・J・Q・Kは0です)。</p>
+    <div id="ruleBody"></div>
+    <p style="font-size: 12px; margin: 8px 0 14px; text-align: left; padding: 0;">○=バンカーは3枚目を引く　×=引かない</p>
+    <h3 style="margin: 4px 0 6px; font-size: 14px;">バンカーの条件(プレイヤーが3枚目を引いたとき)</h3>
+    <div class="cond">
+      <div><b>合計 0〜2</b><span>3枚目の数に関係なく、必ず引く</span></div>
+      <div><b>合計 3</b><span>プレイヤーの3枚目が <b>8以外</b> なら引く(8なら引かない)</span></div>
+      <div><b>合計 4</b><span>プレイヤーの3枚目が <b>2〜7</b> なら引く</span></div>
+      <div><b>合計 5</b><span>プレイヤーの3枚目が <b>4〜7</b> なら引く</span></div>
+      <div><b>合計 6</b><span>プレイヤーの3枚目が <b>6・7</b> なら引く</span></div>
+      <div><b>合計 7</b><span>引かない</span></div>
+      <div><b>合計 8・9</b><span>ナチュラル。どちらも引かずに勝負</span></div>
+    </div>
+    <h3 style="margin: 10px 0 6px; font-size: 14px;">プレイヤーが引かなかったとき</h3>
+    <div class="cond">
+      <div><b>合計 0〜5</b><span>バンカーは3枚目を引く</span></div>
+      <div><b>合計 6・7</b><span>バンカーも引かない</span></div>
+    </div>
+    <div style="height: 12px"></div>
+    <button type="button" class="ghost" id="ruleClose">とじる</button>
+  </div>
+</div>
+<div class="zoomov" id="zoomov" hidden>
+  <p>カバーを指で動かして、マークの数を見ましょう。めくり終えると閉じます。</p>
+  <div id="zoombox"></div>
+  <button type="button" class="ghost" id="zoomClose">とじる(途中までの状態は残ります)</button>
+</div>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
   const SK = 'baccarat-practice-game-v1';
-  let S = { bet: 1, tg: {}, guide: 1, sq: 's', dir: 'd', hist: [], open: 0, order: 'first', w: 0, l: 0, t: 0, pts: 0, streak: 0 };
+  const FEAT_SIZE = true, FEAT_ZOOM = false; /*FEATS*/
+  let S = { size: 'l', snap: 'b', bet: 1, tg: {}, guide: 1, sq: 's', dir: 'd', hist: [], open: 0, order: 'first', w: 0, l: 0, t: 0, pts: 0, streak: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem(SK) || '{}')); } catch (e) { /* ignore */ }
   if (S.sq === 'v' || S.sq === 'h') S.sq = 's';
   if (!(S.v >= 2)) { S.v = 2; S.open = 0; }
@@ -450,11 +513,14 @@ function streakInfo(hands) {
     10: [[30, 18], [70, 18], [50, 28], [30, 39], [70, 39], [30, 61], [70, 61], [50, 72], [30, 82], [70, 82]]
   };
   function faceHtml(c) {
-    if (['J', 'Q', 'K'].includes(c.label)) return '<div class="face"><span class="fl">' + c.label + '</span><small>' + c.suit + '</small></div>';
+    if (['J', 'Q', 'K'].includes(c.label)) {
+      const half = '<span class="fl">' + c.label + '</span><small>' + c.suit + '</small>';
+      return '<div class="face"><div class="fh">' + half + '</div><div class="fh dn">' + half + '</div></div>';
+    }
     const n = c.label === 'A' ? 1 : Number(c.label);
     return PIPS[n].map((q) => '<span class="pip' + (q[1] > 50 && !q[2] ? ' dn' : '') + (q[2] ? ' bigp' : '') + '" style="left:' + q[0] + '%;top:' + q[1] + '%">' + c.suit + '</span>').join('');
   }
-  function cardNode(slot) {
+  function cardNode(slot, big) {
     const c = R.cards[slot];
     const d = document.createElement('div');
     d.className = 'card' + (c.red ? ' red' : '') + (c.rev ? ' gone' : '');
@@ -463,13 +529,13 @@ function streakInfo(hands) {
     const mine = sideOf(slot) === R.me;
     const cv = document.createElement('div');
     cv.className = 'cover' + (mine ? '' : ' opp');
-    const tapOpp = !mine && R.oppTap && !c.rev && ['p1', 'p2', 'b1', 'b2'].includes(slot);
+    const tapOpp = !big && !mine && R.oppTap && !c.rev && ['p1', 'p2', 'b1', 'b2'].includes(slot);
     if (tapOpp) { cv.classList.add('tap'); cv.textContent = 'タップ'; cv.addEventListener('click', () => { if (R.over) return; reveal(slot, true); setTimeout(advance, 380); }); }
     else cv.textContent = mine && S.sq !== 't' ? 'めくる' : mine ? 'タップ' : '';
-    if (mine && !c.rev && (c.tx || c.ty)) { cv.style.transform = 'translate(' + (c.tx || 0) * 96 + 'px,' + (c.ty || 0) * 138 + 'px)'; cv.textContent = ''; }
+    if (mine && !c.rev && (c.tx || c.ty)) { cv.style.transform = 'translate(' + (c.tx || 0) * 100 + '%,' + (c.ty || 0) * 100 + '%)'; cv.textContent = ''; }
     d.appendChild(cv);
-    c.el = d;
-    if (mine && !c.rev) attachSqueeze(slot, d, cv);
+    if (!big) c.el = d;
+    if (mine && !c.rev) attachSqueeze(slot, d, cv, big);
     return d;
   }
   function draw() {
@@ -479,6 +545,29 @@ function streakInfo(hands) {
       SLOTS[sd].forEach((sl) => { if (R.cards[sl]) box.appendChild(cardNode(sl)); });
     });
     $('meP').hidden = !R || R.me !== 'P'; $('meB').hidden = !R || R.me !== 'B';
+    ['P', 'B'].forEach((sd) => {
+      const box = $('cards' + sd);
+      let w = 80;
+      if (FEAT_SIZE && R && sd === R.me) {
+        const cap = { s: 80, m: 104, l: 128 }[S.size] || 80;
+        const n = Math.max(2, SLOTS[sd].filter((sl) => R.cards[sl]).length);
+        const avail = (box.parentElement.clientWidth || 330) - 74 - 8 - 16 - 4;
+        w = Math.max(64, Math.min(cap, Math.floor((avail - (n - 1) * 6) / n)));
+      }
+      const have = R ? SLOTS[sd].filter((sl) => R.cards[sl]).length : 0;
+      if (FEAT_SIZE && R && sd === R.me && have === 3 && S.size !== 's') {
+        // 3枚: めくった2枚は右に縦2段、3枚目は左に大きく
+        const avail = (box.parentElement.clientWidth || 330) - 74 - 8 - 16 - 4;
+        const cap2 = S.size === 'l' ? 74 : 62;
+        const w2 = Math.max(56, Math.min(cap2, Math.floor((avail - 10) / 3)));
+        const w3 = Math.min(2 * w2 + 4, avail - w2 - 6);
+        box.classList.add('tri'); box.style.setProperty('--cw2', w2 + 'px'); box.style.setProperty('--cw3', w3 + 'px');
+        box.style.minHeight = Math.round(w3 * 1.4375) + 'px';
+      } else {
+        box.classList.remove('tri');
+        box.style.setProperty('--cw', w + 'px'); box.style.minHeight = Math.round(w * 1.4375) + 'px';
+      }
+    });
     totals();
   }
   function totals() {
@@ -500,24 +589,24 @@ function streakInfo(hands) {
   }
 
   // ---- squeeze ----
-  function attachSqueeze(slot, d, cv) {
+  function attachSqueeze(slot, d, cv, big) {
     const c = R.cards[slot];
-    let sx = 0, sy = 0, base = 0, axis = '', act = false;
-    const W = 80, H = 115;
+    let sx = 0, sy = 0, base = 0, axis = '', act = false, moved = false;
     const clamp = (x) => Math.max(-1, Math.min(1, x));
-    const done = () => { reveal(slot, false); cv.style.transform = ''; advance(); };
-    const put = () => { cv.style.transform = 'translate(' + (c.tx || 0) * W + 'px,' + (c.ty || 0) * H + 'px)'; };
+    const done = () => { reveal(slot, false); cv.style.transform = ''; if (big) closeZoom(); advance(); };
+    const put = () => { cv.style.transform = 'translate(' + (c.tx || 0) * 100 + '%,' + (c.ty || 0) * 100 + '%)'; };
     cv.addEventListener('pointerdown', (e) => {
-      if (S.sq === 't') { reveal(slot, true); setTimeout(advance, 380); return; }
-      act = true; axis = ''; sx = e.clientX; sy = e.clientY; cv.style.transition = 'none'; cv.textContent = '';
+      if (S.sq === 't') { reveal(slot, true); if (big) closeZoom(); setTimeout(advance, 380); return; }
+      act = true; axis = ''; moved = false; sx = e.clientX; sy = e.clientY; cv.style.transition = 'none'; cv.textContent = '';
       try { cv.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
     });
     cv.addEventListener('pointermove', (e) => {
       if (!act) return;
+      const W = cv.offsetWidth || 80, H = cv.offsetHeight || 115;
       const mx = e.clientX - sx, my = e.clientY - sy;
       if (!axis) {
         if (Math.abs(mx) < 6 && Math.abs(my) < 6) return;
-        axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+        axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y'; moved = true;
         if (axis === 'x') { base = c.tx || 0; c.ty = 0; } else { base = c.ty || 0; c.tx = 0; }
       }
       if (axis === 'x') c.tx = clamp(base + mx / W); else c.ty = clamp(base + my / H);
@@ -525,10 +614,24 @@ function streakInfo(hands) {
     });
     const up = () => {
       if (!act) return; act = false;
-      if (Math.abs(c.tx || 0) > 0.9 || Math.abs(c.ty || 0) > 0.9) { cv.style.transition = 'transform .2s'; cv.style.transform = 'translate(' + (c.tx || 0) * 140 + 'px,' + (c.ty || 0) * 140 + 'px)'; cv.style.opacity = '0'; c.rev = false; setTimeout(done, 200); }
+      if (Math.abs(c.tx || 0) > 0.9 || Math.abs(c.ty || 0) > 0.9) { cv.style.transition = 'transform .2s'; cv.style.transform = 'translate(' + (c.tx || 0) * 140 + '%,' + (c.ty || 0) * 140 + '%)'; cv.style.opacity = '0'; c.rev = false; setTimeout(done, 200); return; }
+      if (!moved && FEAT_ZOOM && !big) openZoom(slot);
+      if (moved && S.snap === 'b') { c.tx = 0; c.ty = 0; cv.style.transition = 'transform .18s ease'; cv.style.transform = 'translate(0,0)'; }
     };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   }
+
+  // ---- zoom (拡大してめくる) ----
+  function openZoom(slot) {
+    const c = R.cards[slot]; if (!c || c.rev) return;
+    const ov = $('zoomov'), box = $('zoombox'); box.innerHTML = '';
+    const w = Math.min(300, Math.floor(window.innerWidth * 0.74), Math.floor((window.innerHeight - 150) / 1.4375));
+    box.style.setProperty('--cw', w + 'px');
+    box.appendChild(cardNode(slot, true));
+    ov.hidden = false; R.zoom = slot;
+  }
+  function closeZoom() { $('zoomov').hidden = true; $('zoombox').innerHTML = ''; if (R) R.zoom = null; draw(); }
+  $('zoomClose').addEventListener('click', () => closeZoom());
 
   // ---- flow ----
   function setMsg(t) { $('msg').innerHTML = t; }
@@ -622,13 +725,13 @@ function streakInfo(hands) {
         occ[c + ',' + r] = cell; cell.c = c; cell.r = r; if (c > maxc) maxc = c;
       });
     });
-    const cols = Math.max(13, maxc + 2); let h = '';
+    const cols = Math.max(16, maxc + 2); let h = '';
     for (let c = 0; c < cols; c++) for (let r = 0; r < 6; r++) {
       const cell = occ[c + ',' + r];
       h += '<div class="rc">' + (cell ? (cell.s === 2 ? '<i class="t">T</i>' : '<i class="' + (cell.s === 0 ? 'b' : 'p') + (cell.w ? ' w' : '') + '">' + (cell.n >= 0 ? cell.n : '') + '</i>') : '') + '</div>';
     }
     $('road').innerHTML = h;
-    const bx = $('roadbox'); bx.scrollLeft = Math.max(0, (maxc + 1) * 27 + 6 - bx.clientWidth);
+    const bx = $('roadbox'); bx.scrollLeft = Math.max(0, (maxc + 1) * 21 + 6 - bx.clientWidth);
   }
   function tallyRender() {
     roadRender();
@@ -665,13 +768,30 @@ function streakInfo(hands) {
     const k = {}; Object.keys(R.cards).forEach((s) => { const c = R.cards[s]; if (c.rev) k[s] = c.v; });
     return k;
   }
+  const setG = (h) => { $('guideText').innerHTML = h + ' <button type="button" class="ruleBtn" id="ruleBtn">3枚目ルール表</button>'; };
+  function ruleTable() {
+    const cols = ['引かない', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const bank = [[0, '常に引く'], [1, ''], [2, ''], [3, '8以外で引く'], [4, '2〜7で引く'], [5, '4〜7で引く'], [6, '6・7で引く'], [7, '引かない']];
+    const draws = (bt, col) => {
+      if (col === 0) return bt <= 5;
+      const v = col - 1;
+      if (bt <= 2) return true; if (bt === 3) return v !== 8; if (bt === 4) return v >= 2 && v <= 7; if (bt === 5) return v >= 4 && v <= 7; if (bt === 6) return v === 6 || v === 7; return false;
+    };
+    let h = '<table class="rt"><thead><tr><th>バンカー<br>の合計</th>' + cols.map((c, i) => '<th' + (i === 0 ? ' class="np"' : '') + '>' + c + '</th>').join('') + '</tr></thead><tbody>';
+    bank.forEach((b) => { h += '<tr><th>' + b[0] + '</th>' + cols.map((c, i) => '<td class="' + (draws(b[0], i) ? 'dy' : 'ns') + '">' + (draws(b[0], i) ? '○' : '×') + '</td>').join('') + '</tr>'; });
+    return h + '</tbody></table>';
+  }
+  function openRules() { $('ruleBody').innerHTML = ruleTable(); $('ruleov').hidden = false; }
+  $('guideText').addEventListener('click', (e) => { if (e.target.id === 'ruleBtn') { e.stopPropagation(); openRules(); } });
+  $('ruleClose').addEventListener('click', () => { $('ruleov').hidden = true; });
   function guide() {
     const g = $('guide');
+    if (!g.dataset.tapBound) { g.dataset.tapBound = '1'; g.addEventListener('click', () => g.classList.toggle('open')); }
     g.hidden = !S.guide;
     if (!S.guide) return;
     $('chips').innerHTML = ''; $('chipNote').textContent = '';
-    if (!R) { $('guideText').innerHTML = 'バンカーもプレイヤーも、勝てば賭けの1倍です。バンカーのほうが、勝つ確率がわずかに高めです。'; return; }
-    if (R.over) { $('guideText').innerHTML = '結果が出ました。ナチュラル(8・9)や、3枚目のルールで、勝負がどう動いたかを見返してみましょう。'; return; }
+    if (!R) { setG('バンカーもプレイヤーも、勝てば賭けの1倍です。バンカーのほうが、勝つ確率がわずかに高めです。'); return; }
+    if (R.over) { setG('結果が出ました。ナチュラル(8・9)や、3枚目のルールで、勝負がどう動いたかを見返してみましょう。'); return; }
     const me = R.me, known = knownMap(), p0 = pool();
     const target = minePending()[0];
     const cur = sim(known, p0, me, 2500);
@@ -683,7 +803,8 @@ function streakInfo(hands) {
     }
     const oppOpen = SLOTS[other(me)].map((s) => R.cards[s]).filter((c) => c && c.rev);
     if (oppOpen.length) txt += '<br>相手の見えている札: ' + oppOpen.map((c) => c.label).join('、');
-    $('guideText').innerHTML = txt;
+    { const parts = txt.split('<br>'), rest = parts.slice(1).join('<br>');
+      setG(parts[0] + (rest ? ' <span class="moreHint">▼</span><span class="more"><br>' + rest + '</span>' : '')); }
     if (target) {
       const labels = ['10系', 'A', '2', '3', '4', '5', '6', '7', '8', '9'];
       let html = '';
@@ -702,11 +823,11 @@ function streakInfo(hands) {
 
   // ---- settings ----
   function segSync() {
-    [['sGuide', String(S.guide)], ['sSq', S.sq], ['sOpen', String(S.open)], ['sOrder', S.order]].forEach(([id, v]) => {
+    [['sGuide', String(S.guide)], ['sSq', S.sq], ['sSz', S.size], ['sSn', S.snap], ['sOpen', String(S.open)], ['sOrder', S.order]].forEach(([id, v]) => {
       document.querySelectorAll('#' + id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
     });
   }
-  [['sGuide', 'guide', Number], ['sSq', 'sq', String], ['sOpen', 'open', Number], ['sOrder', 'order', String]].forEach(([id, key, cast]) => {
+  [['sGuide', 'guide', Number], ['sSq', 'sq', String], ['sSz', 'size', String], ['sSn', 'snap', String], ['sOpen', 'open', Number], ['sOrder', 'order', String]].forEach(([id, key, cast]) => {
     document.querySelectorAll('#' + id + ' button').forEach((b) => b.addEventListener('click', () => { S[key] = cast(b.dataset.v); save(); segSync(); if (key === 'sq' && R && !R.over) draw(); guide(); }));
   });
   const stakeSet = (v) => { S.bet = Math.max(1, Math.min(1000, v)); $('stAmt').textContent = S.bet; save(); };
@@ -719,5 +840,6 @@ function streakInfo(hands) {
   window.__practice = { get R() { return R; }, S, advance };
 })();
 </script>
+<div class="appver" style="text-align:center;font-size:11px;color:#8fb3a6;padding:2px 0 28px;opacity:.85">バカラ練習帳 バージョン 2.0.0(2026-11-24)</div>
 </body>
 </html>
