@@ -1,6 +1,6 @@
 // Offline cache for the Baccarat apps. After the first online visit each app opens without a connection.
 // The CACHE name changes automatically with the page content.
-const CACHE = 'bk-prac-v2-7815163b';
+const CACHE = 'bk-prac-v2-763f03b2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
